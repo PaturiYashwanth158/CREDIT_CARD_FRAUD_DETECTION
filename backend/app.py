@@ -1,30 +1,30 @@
-
-from flask import Flask, request, jsonify
+import os
 import joblib
 import numpy as np
+from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 
-model = joblib.load("models/ensemble_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
+# Load full pipeline model (includes scaler)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "models", "ensemble_model.pkl")
+model = joblib.load(model_path)
 
-@app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "FraudX Enterprise API Running"})
+@app.route("/")
+def home():
+    return "Fraud Detection ML API is Running 🚀"
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    data = request.json
-    
-    features = np.array([data["features"]])
-    features_scaled = scaler.transform(features)
-    
-    prediction = model.predict(features_scaled)[0]
-    probability = model.predict_proba(features_scaled)[0][1]
+    data = request.json["features"]
+    features = np.array(data).reshape(1, -1)
+
+    prediction = model.predict(features)[0]
+    probability = model.predict_proba(features)[0][1]
 
     return jsonify({
-        "fraud": bool(prediction),
-        "riskScore": round(probability * 100, 2)
+        "fraud_prediction": int(prediction),
+        "fraud_probability": float(probability)
     })
 
 if __name__ == "__main__":
