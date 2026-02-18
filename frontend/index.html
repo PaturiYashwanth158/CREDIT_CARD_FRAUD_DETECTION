@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FraudX Enterprise</title>
+</head>
+<body>
+    <h2>FraudX Enterprise ML API Test</h2>
+    <button onclick="testPrediction()">Test Enterprise Prediction</button>
+
+    <script>
+        async function testPrediction() {
+            const sampleFeatures = Array(30).fill(0.5); // simulate PCA features
+
+            const response = await fetch("http://127.0.0.1:5000/predict", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({
+                    features: sampleFeatures
+                })
+            });
+
+            const result = await response.json();
+            alert("Fraud: " + result.fraud + "\nRisk Score: " + result.riskScore + "%");
+        }
+    </script>
+</body>
+</html>
